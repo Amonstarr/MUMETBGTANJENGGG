@@ -380,3 +380,52 @@ void ubah_status()
     system("cls");
     menu_operator();
 }
+
+void hapus_akun_cust()
+{
+    FILE *akun_customer;
+    struct operator data_customer;
+
+    akun_customer = fopen("akun_customer", "rb");
+    
+    if (akun_customer == 0)
+    {
+        printf("Gagal membuka file\n");
+        return;
+    }
+
+    printf("Data akun customer");
+
+    while(fread(&data_customer, sizeof(data_customer), 1, akun_customer)==1)
+    {
+        printf("Username: %s\n", data_customer.username);
+        printf("\n");
+    }
+
+    FILE *akun;
+    FILE *akun2;
+
+    char cari[20];
+
+    akun = fopen("akun_customer.dat", "rb");
+    akun2 = fopen("akun_customer2.dat", "wb");
+
+    printf("Masukkan Username Akun Yang Ingin Dihapus : "); gets(cari);
+
+    while (fread(&data_customer, sizeof(data_customer), 1, akun)==1)
+    {
+        if(strcmp(data_customer.username, cari)!=0){
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+
+        fclose(akun);
+        fclose(akun2);
+        remove("akun");
+        rename("akun2", "akun");
+        printf("data berhasil dihapus");
+        system("pause");
+        menu_operator();
+    }
+}
+
+
