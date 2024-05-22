@@ -4,23 +4,24 @@
 
 struct operator
 {
-    char username[20];
-    char password[20];
-    char email[20];
-    char nomor_telepon[20];
-    char menu[20];
-    char status[20];
-} data_operator, operatoraktif;
+    char username[20], password[20], email[20], nomor_telepon[20], menu[20], status[20];
+} data_operator, operator_aktif;
 
 struct customer
 {
-    char username[20];
-    char password[20];
-    char email[20];
-    char nomor_telepon[20];
-    char menu[20];
-    char status[20];
+    char username[20], password[20], email[20], nomor_telepon[20], menu[20], status[20];
 } data_customer, customer_aktif;
+
+struct pesanan
+{
+    char nama[20], makanan[20], minuman[20], metode[20];
+    int jumlah;
+} pesan;
+
+struct game
+{
+    char game[20]
+} game;
 
 void menu_registrasi();
 void registrasi_operator();
@@ -39,8 +40,11 @@ void install_game();
 void install_program();
 void hapus_game();
 void hapus_program();
-
-
+void billing_warnet();
+void pilih_game();
+void pesan_makanan_minuman();
+void cek_status();
+void informasi_saldo();
 
 int main()
 {
@@ -166,7 +170,7 @@ int login_operator(int attempt)
             gets(password);
             if (strcmp(data_operator.password, password)==0)
             {
-                operatoraktif = data_operator;
+                operator_aktif = data_operator;
                 fclose(akun_operator);
                 system("cls");
                 attempt = -1;
@@ -242,6 +246,56 @@ void menu_operator()
         break;
     }
 }
+
+void menu_customer()
+{
+    int menu;
+
+    printf("============================================================\n");
+    printf("------------------------- D'WARNET -------------------------\n");
+    printf("============================================================\n");
+
+    printf("1. Paket warnet\n2. Pilih game\n3. Pesan makanan/minuman\n4. Lihat status makanan\n5. informasi saldo\n6. Kembali\n");
+    printf("pilih menu (1/2/3/4/5/6) : ");
+    scanf("%d", &menu);
+    getchar();
+    system("cls");
+
+    switch (menu)
+    {
+        case 1:
+        billing_warnet();
+        break;
+
+        case 2:
+        pilih_game();
+        break;
+
+        case 3:
+        pesan_makanan_minuman();
+        break;
+
+        case 4:
+        cek_status();
+        break;
+
+        case 5:
+        informasi_saldo();
+        break;
+
+        case 6:
+        printf("Berhasil Kembali\n");
+        system("pause");
+        system("cls");
+        main();
+
+        default:
+        printf("Maaf pilihan anda tidak tersedia\n");
+        main();
+        break;
+    }
+}
+
 
 void manajemen_akun()
 {
@@ -319,14 +373,14 @@ void manajemen_pc()
 
 void ubah_status()
 {
-    FILE *akun_customer;
-    FILE *akun_customer2;
+    FILE *akun;
+    FILE *akun2;
 
     char cari[20], tempStatus[20];
     int menu;
 
-    akun_customer = fopen("akun_customer.dat", "rb");
-    akun_customer2 = fopen("akun_customer.dat", "wb");
+    akun = fopen("akun_customer.dat", "rb");
+    akun = fopen("akun_customer.dat", "wb");
 
     printf("============================================================\n");
     printf("------------------------- D'WARNET -------------------------\n");
@@ -358,21 +412,21 @@ void ubah_status()
 
         default:
         printf("Pilihan tidak valid.\n");
-        fclose(akun_customer);
-        fclose(akun_customer2);
+        fclose(akun);
+        fclose(akun2);
         menu_operator();
         break;
     }
-    while (fread(&data_customer, sizeof(data_customer), 1, akun_customer)==1)
+    while (fread(&data_customer, sizeof(data_customer), 1, akun)==1)
     {
         if (strcmp(data_customer.username, cari)==0)
         {
             strcpy(data_customer.status, tempStatus);
         }
-        fwrite(&data_customer, sizeof(data_customer), 1, akun_customer2);
+        fwrite(&data_customer, sizeof(data_customer), 1, akun2);
     }
-    fclose(akun_customer);
-    fclose(akun_customer2);
+    fclose(akun);
+    fclose(akun);
     remove("akun_customer.dat");
     rename("akun_customer2.dat", "akun_customer.dat");
     printf("Status pesanan berhasil diubah");
@@ -427,5 +481,35 @@ void hapus_akun_cust()
         menu_operator();
     }
 }
+
+void cek_status()
+{
+    FILE *file;
+    struct pesanan pesan;
+
+    file = fopen("data pesanan.dat", "rb");
+    if (file == NULL)
+    {
+        printf("Gagal membuka file pesanan.\n");
+        return;
+    }
+
+    printf("=============================================\n");
+    printf("Daftar Pesanan:\n");
+    printf("=============================================\n");
+
+    while (fread(&pesan, sizeof(pesan), 1, file) == 1)
+    {
+        printf("Nama Pemesan\t: %s\n", pesan.nama);
+        printf("Jumlah Pesanan\t: %d\n", pesan.jumlah);
+        printf("status pesanan : %s\n", customer_aktif.status);
+    }
+
+    fclose(file);
+    system("pause");
+    system("cls");
+    menu_customer();
+}
+
 
 
