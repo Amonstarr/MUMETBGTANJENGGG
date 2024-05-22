@@ -511,5 +511,33 @@ void cek_status()
     menu_customer();
 }
 
+void informasi_akun_customer()
+{
 
+    FILE *file;
+    struct operator operator_aktif;
+
+    file = fopen("akun_customer.dat", "rb");
+
+    if (file == NULL)
+    {
+        printf("Gagal membuka file.\n");
+        return;
+    }
+
+    printf("Data Akun Customer:\n");
+    while (fread(&data_customer, sizeof(data_customer), 1, file) == 1)
+    {
+        printf("Username: %s\n", data_customer.username);
+        printf("Password: %s\n", data_customer.password);
+        printf("Nomor telepon : %s\n", data_customer.nomor_telepon);
+        printf("Email: %s\n", data_customer.email);
+        printf("\n");
+    }
+
+    fclose(file);
+    system("pause");
+    system("cls");
+    menu_operator();
+}
 
