@@ -10,19 +10,25 @@ struct operator
 struct customer
 {
     char username[20], password[20], email[20], nomor_telepon[20], menu[20], status[20];
-    int saldo;
+    int saldo, harga, jumlah, pengeluaran;
 } data_customer, customer_aktif;
 
 struct pesanan
 {
-    char nama[20], makanan[20], minuman[20], metode[20];
-    int jumlah;
-} pesan;
+    char nama[20], makanan[20], minuman[20];
+    int jumlah, harga;
+} pesanan[500];
 
 struct game
 {
     char game[20]
 } game;
+
+struct warnet
+{
+    int lama, total;
+} warnet;
+
 
 void menu_registrasi();
 void registrasi_operator();
@@ -32,7 +38,7 @@ int login_customer();
 void menu_operator();
 void manajemen_pc();
 void manajemen_akun();
-void tambah_menu();
+//void tambah_menu();
 void ubah_status();
 void hapus_akun_cust();
 void lihat_akun_cust();
@@ -42,11 +48,12 @@ void install_program();
 void hapus_game();
 void hapus_program();
 void billing_warnet();
-void pilih_game();
-void pesan_makanan_minuman();
+//void pilih_game();
+//void pesan_makanan_minuman();
 void cek_status();
 void informasi_saldo();
 void topup_saldo();
+void bayar();
 
 int main()
 {
@@ -148,6 +155,34 @@ void registrasi_operator()
     main();
 }
 
+void resigtrasi_customer()
+{
+    printf("============================================================\n");
+    printf("------------------------- D'WARNET -------------------------\n");
+    printf("============================================================\n");
+    FILE *akun;
+    struct operator data_customer = {0};
+
+    akun = fopen("akun_customer.dat", "ab");
+
+    printf("Masukkan Username : ");
+    gets(data_customer.username);
+    printf("Masukkan Password : ");
+    gets(data_customer.password);
+    printf("Masukkan Email : ");
+    gets(data_customer.email);
+    printf("Masukkan Nomor Telepon : ");
+    gets(data_customer.nomor_telepon);
+
+    fwrite(&data_customer, sizeof(data_customer), 1, akun);
+    fclose(akun);
+
+    printf("Registrasi Berhasil\n");
+    system("pause");
+    system("cls");
+    main();
+}
+
 int login_operator(int attempt)
 {
     printf("============================================================\n");
@@ -206,6 +241,64 @@ int login_operator(int attempt)
     }
 }
 
+int login_customer(int attempt)
+{
+    printf("============================================================\n");
+    printf("------------------------- D'WARNET -------------------------\n");
+    printf("============================================================\n");
+
+    FILE *akun_customer;
+    struct operator data_customer;
+
+    akun_customer = fopen("akun_customer.dat", "rb");
+
+    char username[30], password[30];
+
+    printf("Masukkan Username : ");
+    gets(username);
+
+    while (fread(&data_customer, sizeof(data_customer), 1, akun_customer)==1)
+    {
+        if (strcmp(data_customer.username, username)==0)
+        {
+            printf("Masukkan Password : ");
+            gets(password);
+            if (strcmp(data_customer.password, password)==0)
+            {
+                operator_aktif = data_customer;
+                fclose(akun_customer);
+                system("cls");
+                attempt = -1;
+                break;
+            }
+            else
+            {
+                attempt--;
+            }
+        }
+    }
+    if (attempt == -1)
+    {
+        menu_operator();
+    }
+    else if (attempt > 0)
+    {
+        printf("============================================================\n");
+        printf("------------------------- D'WARNET -------------------------\n");
+        printf("============================================================\n");
+        fclose(akun_customer);
+        login_operator(attempt);
+    }
+    else
+    {
+        printf("Maaf kesempatan percobaan sudah habis\n");
+        system("pause");
+        system("cls");
+        fclose(akun_customer);
+        main();
+    }
+}
+
 void menu_operator()
 {
     int menu;
@@ -230,7 +323,7 @@ void menu_operator()
         break;
 
         case 3:
-        tambah_menu();
+        //tambah_menu();
         break;
 
         case 4:
@@ -270,11 +363,11 @@ void menu_customer()
         break;
 
         case 2:
-        pilih_game();
+        //pilih_game();
         break;
 
         case 3:
-        pesan_makanan_minuman();
+        //pesan_makanan_minuman();
         break;
 
         case 4:
@@ -614,5 +707,175 @@ void informasi_saldo()
         printf("Pilihan tidak valid. Silakan coba lagi.\n");
         informasi_saldo();
         break;
+    }
+}
+
+void bayar()
+{
+    int harga, total;
+    printf("============================================================\n");
+    printf("------------------------- D'WARNET -------------------------\n");
+    printf("============================================================\n");
+
+    FILE *akun;
+    FILE *akun2;
+
+    akun = fopen("akun_customer.dat", "rb");
+    akun2 = fopen("akun_customer2.dat", "wb");
+
+    if (total > customer_aktif.saldo)
+    {
+    printf("Mohon maaf saldo anda tidak mencukupi\n");
+        fclose(akun);
+        fclose(akun2);
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+    else
+    {
+        while (fread(&data_customer, sizeof(data_customer), 1, akun) == 1)
+        {
+            if (strcmp(customer_aktif.username, data_customer.username) == 0)
+            {
+                data_customer.saldo -= harga;
+                data_customer.pengeluaran += harga;
+                data_customer.jumlah += 1;
+            }
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+        fclose(akun);
+        fclose(akun2);
+        remove("akun_customer.dat");
+        rename("akun_customer2.dat", "akun_customer.dat");
+        printf("Setor Berhasil\n");
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+}
+
+void billing_warnet()
+{
+    int menu, total, harga = 5000, lama;
+
+    FILE *akun;
+    FILE *akun2;
+
+    printf("====================== Pilih Paket =====================\n");
+    printf("1. Paket 1\n2. Paket 2\n3. Paket 3\n4. Kembali");
+    printf("pilih menu (1/2/3/4/5) : "); scanf("%d", &menu); 
+    getchar();
+    system("cls");
+
+    switch (menu)
+    {
+        case 1:
+        total = harga * 1;
+        if (total > customer_aktif.saldo)
+    {
+    printf("Mohon maaf saldo anda tidak mencukupi\n");
+        fclose(akun);
+        fclose(akun2);
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+    else
+    {
+        while (fread(&data_customer, sizeof(data_customer), 1, akun) == 1)
+        {
+            if (strcmp(customer_aktif.username, data_customer.username) == 0)
+            {
+                data_customer.saldo -= harga;
+                data_customer.pengeluaran += harga;
+                data_customer.jumlah += 1;
+            }
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+        fclose(akun);
+        fclose(akun2);
+        remove("akun_customer.dat");
+        rename("akun_customer2.dat", "akun_customer.dat");
+        printf("Setor Berhasil\n");
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+        break;
+
+        case 2:
+        total = harga * 2;
+        if (total > customer_aktif.saldo)
+    {
+    printf("Mohon maaf saldo anda tidak mencukupi\n");
+        fclose(akun);
+        fclose(akun2);
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+    else
+    {
+        while (fread(&data_customer, sizeof(data_customer), 1, akun) == 1)
+        {
+            if (strcmp(customer_aktif.username, data_customer.username) == 0)
+            {
+                data_customer.saldo -= harga;
+                data_customer.pengeluaran += harga;
+                data_customer.jumlah += 1;
+            }
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+        fclose(akun);
+        fclose(akun2);
+        remove("akun_customer.dat");
+        rename("akun_customer2.dat", "akun_customer.dat");
+        printf("Setor Berhasil\n");
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+        break;
+
+        case 3:
+        total = harga * 3;
+        if (total > customer_aktif.saldo)
+    {
+    printf("Mohon maaf saldo anda tidak mencukupi\n");
+        fclose(akun);
+        fclose(akun2);
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+    else
+    {
+        while (fread(&data_customer, sizeof(data_customer), 1, akun) == 1)
+        {
+            if (strcmp(customer_aktif.username, data_customer.username) == 0)
+            {
+                data_customer.saldo -= harga;
+                data_customer.pengeluaran += harga;
+                data_customer.jumlah += 1;
+            }
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+        fclose(akun);
+        fclose(akun2);
+        remove("akun_customer.dat");
+        rename("akun_customer2.dat", "akun_customer.dat");
+        printf("Setor Berhasil\n");
+        system("pause");
+        system("cls");
+        menu_customer();
+    }
+        break;
+
+        default:
+        printf("Pilihan tidak tersedia\n");
+        system("pause");
+        system("cls");
+        main();
     }
 }
