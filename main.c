@@ -10,6 +10,7 @@ struct operator
 struct customer
 {
     char username[20], password[20], email[20], nomor_telepon[20], menu[20], status[20];
+    int saldo;
 } data_customer, customer_aktif;
 
 struct pesanan
@@ -45,6 +46,7 @@ void pilih_game();
 void pesan_makanan_minuman();
 void cek_status();
 void informasi_saldo();
+void topup_saldo();
 
 int main()
 {
@@ -124,20 +126,20 @@ void registrasi_operator()
     printf("------------------------- D'WARNET -------------------------\n");
     printf("============================================================\n");
     FILE *akun;
-    struct operator new_operator = {0};
+    struct operator data_operator = {0};
 
     akun = fopen("akun_operator.dat", "ab");
 
     printf("Masukkan Username : ");
-    gets(new_operator.username);
+    gets(data_operator.username);
     printf("Masukkan Password : ");
-    gets(new_operator.password);
+    gets(data_operator.password);
     printf("Masukkan Email : ");
-    gets(new_operator.email);
+    gets(data_operator.email);
     printf("Masukkan Nomor Telepon : ");
-    gets(new_operator.nomor_telepon);
+    gets(data_operator.nomor_telepon);
 
-    fwrite(&new_operator, sizeof(new_operator), 1, akun);
+    fwrite(&data_operator, sizeof(data_operator), 1, akun);
     fclose(akun);
 
     printf("Registrasi Berhasil\n");
@@ -494,9 +496,7 @@ void cek_status()
         return;
     }
 
-    printf("=============================================\n");
-    printf("Daftar Pesanan:\n");
-    printf("=============================================\n");
+    printf("========================= Indormasi Pesanan ========================\n");  
 
     while (fread(&pesan, sizeof(pesan), 1, file) == 1)
     {
@@ -541,3 +541,78 @@ void informasi_akun_customer()
     menu_operator();
 }
 
+void informasi_saldo()
+{
+    int jumlah, menu, hasil = 0;
+    FILE *akun;
+    FILE *akun2;
+
+    printf("========================= Menu Saldo ========================\n");
+    printf("1. Cek saldo\n2. Topup saldo\n3. Kembali\n");
+    printf("Pilih menu (1/2/3) : ");
+    scanf("%d", &menu);
+    system("cls");
+
+    switch (menu)
+    {
+        case 1:
+        akun = fopen("akun_customer", "rb");
+        if (akun == NULL)
+        {
+            printf("Gagal membuka file");
+            return;
+        }
+        while (fread(&customer_aktif, sizeof(customer_aktif), 1, akun)==1)
+        {
+            if (strcmp(data_customer.username, customer_aktif.username)==0)
+            {
+                printf("Saldo Anda: Rp %d\n", customer_aktif.saldo);
+                break;
+            }
+        }
+
+        fclose(akun);
+        system("pause");
+        system("cls");
+        break;
+
+        case 2:
+        hasil = customer_aktif.saldo;
+        akun = fopen("akun_customer.dat", "rb");
+        akun = fopen("akun_customer2.dat", "wb");
+
+        printf("========================= Top Up ========================\n");
+        printf("Masukkan jumlah top up saldo : Rp  ");
+        scanf("%d", &jumlah);
+        hasil = data_customer.saldo + jumlah;
+
+        while (fread(&data_customer, sizeof(data_customer), 1, akun)==1)
+        {
+            if (strcmp(data_customer.username, customer_aktif.username)==0)
+            {
+                data_customer.saldo = hasil;
+            }
+            fwrite(&data_customer, sizeof(data_customer), 1, akun2);
+        }
+        printf("Top Up berhasil\nSaldo sekarang : Rp %d\n", hasil);
+        fclose(akun);
+        fclose(akun2);
+
+        remove("akun_customer.dat");
+        rename("akun_customer2.dat", "akun_customer.dat");
+        system("pause");
+        system("cls");
+        menu_customer();
+        break;
+
+        case 3:
+        fclose(akun);
+        menu_customer();
+        break;
+
+        default:
+        printf("Pilihan tidak valid. Silakan coba lagi.\n");
+        informasi_saldo();
+        break;
+    }
+}
