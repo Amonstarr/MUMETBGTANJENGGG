@@ -29,6 +29,36 @@ struct installSistem {
     char namaSistem[50];
 };
 
+void menu_registrasi();
+void menu_login();
+void registrasi_operator();
+void resigtrasi_customer();
+int login_operator(int attempt);
+int login_customer(int attempt);
+void menu_operator();
+void menu_customer();
+void manajemen_akun();
+void manajemen_pc();
+void lihat_akun_cust();
+void hapus_akun_cust();
+void tambah_menu();
+void informasi_saldo();
+void install_sistem();
+void pesan_makan();
+void tampil_menu_makanan();
+void tampil_menu_minuman();
+void bayar();
+void ubah_status(const char *username);
+void lihat_status(const char *username);
+void menu_lihat_status();
+void install();
+void pilih_game();
+void hapus();
+void hapus_game();
+void hapus_program();
+
+
+
 int main()
 {
     system("cls");
@@ -620,6 +650,7 @@ void informasi_saldo()
         fclose(akun);
         system("pause");
         system("cls");
+        menu_customer();
         break;
 
 
@@ -967,7 +998,8 @@ void install()
     menu_operator();
 }
 
-void pilih_game() {
+void pilih_game() 
+{
     FILE *file;
     struct game newGame;
     int pilih;
@@ -997,7 +1029,8 @@ void pilih_game() {
 
         case 2:
         file = fopen("program.dat", "rb");
-        if (file == NULL) {
+        if (file == NULL) 
+        {
             printf("Tidak ada program yang tersedia saat ini.\n");
             return;
         }
@@ -1015,12 +1048,12 @@ void pilih_game() {
         break;
 
         default:
-            printf("Pilihan tidak valid.\n");
-            pilih_game();
+        printf("Pilihan tidak valid.\n");
+        pilih_game();
     }
 }
 
-hapus() 
+void hapus() 
 {
     FILE *file;
     int pilih;
